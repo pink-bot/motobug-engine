@@ -1273,19 +1273,27 @@ function drawChar() {
 	widthOffset = (char.currentAnim[Math.floor(char.frameIndex)][2] / 2) * ((char.goingLeft) ? 1 : -1); //width offset. made to equal half of sprite width
 	heightOffset = -(char.currentAnim[Math.floor(char.frameIndex)][3]);// height offset. made to equal sprite heght
 	trueAngle = 0; //used to store copy of sonic's physical angle
-	if (configuration.classicAngles) {
-		trueAngle = char.angle //store sonic's actual angle here while using the main variable for graphical calculations
+	
+	trueAngle = char.angle //store sonic's actual angle here while using the main variable for graphical calculations
+
+	if (configuration.classicAngles) {	
 		char.angle = Math.round(char.angle / (Math.PI / 4)) * (Math.PI / 4); // <-- character angle temporarily set to closest multiple of 45 degrees
 	}
 
-	c.translate((char.x + cam.x + widthOffset * Math.cos(char.angle) - heightOffset * Math.sin(char.angle)), (char.y + cam.y + heightOffset * Math.cos(char.angle) + widthOffset * Math.sin(char.angle)));
-	//offset variables used here to account for sprite rotation
-	
-	c.rotate(char.angle);
-	if (configuration.classicAngles) {
-		char.angle = trueAngle; //restore sonic's angle to actual value before any physical calculations can be performed
-
+	if(char.currentAnim == anim.jump)
+	{   //rolling animations are not angled and need different equations to calculate x and y offset-where is the upper left corner in relation to the ground?
+		c.translate((char.x + cam.x + widthOffset - heightOffset * Math.sin(char.angle)/2), (char.y + cam.y + (heightOffset * Math.cos(char.angle)/2)) + heightOffset/2);
+	    c.rotate(0);
 	}
+	else 
+	{   //offset variables used here to account for sprite rotation-compensates for the fact that images pivot around the upper left corner
+		c.translate((char.x + cam.x + widthOffset * Math.cos(char.angle) - heightOffset * Math.sin(char.angle)), (char.y + cam.y + heightOffset * Math.cos(char.angle) + widthOffset * Math.sin(char.angle)));	
+		c.rotate(char.angle);
+	}
+	
+	char.angle = trueAngle; //restore sonic's angle to actual value before any physical calculations can be performed
+
+	
 	if (motionBlurToggle) {
 		//mBlurCtx.translate((vScreenW/2+(cam.tx-cam.x))+a*Math.cos(char.angle)-b*Math.sin(char.angle),vScreenH/2+(cam.ty-cam.y)+b*Math.cos(char.angle)+a*Math.sin(char.angle));
 		mBlurCtx.translate(char.x + cam.x + widthOffset * Math.cos(char.angle) - heightOffset * Math.sin(char.angle), char.y + cam.y + heightOffset * Math.cos(char.angle) + widthOffset * Math.sin(char.angle))
